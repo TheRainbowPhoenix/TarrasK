@@ -16,15 +16,18 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#include "utils.h"
 
 /*
  * Fill this section in with some information about your app.
  * All fields are optional - so if you don't need one, take it out.
  */
+#ifndef PC
 APP_NAME("TarrasK")
 APP_DESCRIPTION("RE Toolkit")
 APP_AUTHOR("Phoebe C.")
 APP_VERSION("1.0.0")
+#endif
 
 struct CPUState {
     uint32_t r0;
@@ -62,79 +65,112 @@ extern "C" void BreakpointHandlerStub();
 extern "C"
 void BreakpointHandler(struct CPUState *cpuState) {
 
+    int carret_x = 0;
+
     Debug_SetCursorPosition(0, 0);
     //Example for Debug_Printf(x,y,invert_color,0,format_string) //(small text)
-    Debug_Printf(0,0,false,0,":: TRK :: Breakpoint                               ::"); //(small text)
+    Debug_Printf(0,carret_x,false,0,":: TRK :: Breakpoint                               ::"); //(small text)
 
-    Debug_Printf(0,1,true,0," r0  %08X r1  %08X r2  %08X r3  %08X ", cpuState->r0, cpuState->r1, cpuState->r2, cpuState->r3); //(small text)
-    Debug_Printf(0,2,true,0," r4  %08X r5  %08X r6  %08X r7  %08X ", cpuState->r4, cpuState->r5, cpuState->r6, cpuState->r7); //(small text)
-    Debug_Printf(0,3,true,0," r8  %08X r9  %08X r10 %08X r11 %08X ", cpuState->r8, cpuState->r9, cpuState->r10, cpuState->r11); //(small text)
-    Debug_Printf(0,4,true,0," r12 %08X r13 %08X r14 %08X r15 %08X ", cpuState->r12, cpuState->r13, cpuState->r14, cpuState->r15); //(small text)
-    Debug_Printf(0,5,true,0," gbr %08X pr  %08X ach %08X acl %08X ", cpuState->gbr, cpuState->pr, cpuState->mach, cpuState->macl); //(small text)
-    Debug_Printf(0,6,true,0,"_                                                   _");
+    Debug_Printf(0,++carret_x,true,0," r0  %08X r1  %08X r2  %08X r3  %08X ", cpuState->r0, cpuState->r1, cpuState->r2, cpuState->r3); //(small text)
+    Debug_Printf(0,++carret_x,true,0," r4  %08X r5  %08X r6  %08X r7  %08X ", cpuState->r4, cpuState->r5, cpuState->r6, cpuState->r7); //(small text)
+    Debug_Printf(0,++carret_x,true,0," r8  %08X r9  %08X r10 %08X r11 %08X ", cpuState->r8, cpuState->r9, cpuState->r10, cpuState->r11); //(small text)
+    Debug_Printf(0,++carret_x,true,0," r12 %08X r13 %08X r14 %08X r15 %08X ", cpuState->r12, cpuState->r13, cpuState->r14, cpuState->r15); //(small text)
+    Debug_Printf(0,++carret_x,true,0," gbr %08X pr  %08X ach %08X acl %08X ", cpuState->gbr, cpuState->pr, cpuState->mach, cpuState->macl); //(small text)
+    Debug_Printf(0,++carret_x,false,0," r| Hex Dump                          | Ascii        ");
 
-
-
-//    Debug_SetCursorPosition(0, 1);
-//    Debug_PrintString("r0 =xxxxxxxx r1 =xxxxxxxx", false);
-//    Debug_PrintNumberHex_Dword(cpuState->r0, 4, 1);
-//    Debug_PrintNumberHex_Dword(cpuState->r1, 17, 1);
-
-//    Debug_SetCursorPosition(0, 2);
-//    Debug_PrintString("r2 =xxxxxxxx r3 =xxxxxxxx", false);
-//    Debug_PrintNumberHex_Dword(cpuState->r2, 4, 2);
-//    Debug_PrintNumberHex_Dword(cpuState->r3, 17, 2);
-
-//    Debug_SetCursorPosition(0, 3);
-//    Debug_PrintString("r4 =xxxxxxxx r5 =xxxxxxxx", false);
-//    Debug_PrintNumberHex_Dword(cpuState->r4, 4, 3);
-//    Debug_PrintNumberHex_Dword(cpuState->r5, 17, 3);
-//
-//    Debug_SetCursorPosition(0, 4);
-//    Debug_PrintString("r6 =xxxxxxxx r7 =xxxxxxxx", false);
-//    Debug_PrintNumberHex_Dword(cpuState->r6, 4, 4);
-//    Debug_PrintNumberHex_Dword(cpuState->r7, 17, 4);
-//
-//    Debug_SetCursorPosition(0, 5);
-//    Debug_PrintString("r8 =xxxxxxxx r9 =xxxxxxxx", false);
-//    Debug_PrintNumberHex_Dword(cpuState->r8, 4, 5);
-//    Debug_PrintNumberHex_Dword(cpuState->r9, 17, 5);
-//
-//    Debug_SetCursorPosition(0, 6);
-//    Debug_PrintString("r10=xxxxxxxx r11=xxxxxxxx", false);
-//    Debug_PrintNumberHex_Dword(cpuState->r10, 4, 6);
-//    Debug_PrintNumberHex_Dword(cpuState->r11, 17, 6);
-//
-//    Debug_SetCursorPosition(0, 7);
-//    Debug_PrintString("r12=xxxxxxxx r13=xxxxxxxx", false);
-//    Debug_PrintNumberHex_Dword(cpuState->r12, 4, 7);
-//    Debug_PrintNumberHex_Dword(cpuState->r13, 17, 7);
-//
-//    Debug_SetCursorPosition(0, 8);
-//    Debug_PrintString("r14=xxxxxxxx r15=xxxxxxxx", false);
-//    Debug_PrintNumberHex_Dword(cpuState->r14, 4, 8);
-//    Debug_PrintNumberHex_Dword(cpuState->r15, 17, 8);
-
-//    Debug_SetCursorPosition(0, 10);
-//    Debug_PrintString("gbr=xxxxxxxx pr =xxxxxxxx", false);
-//    Debug_PrintNumberHex_Dword(cpuState->gbr, 4, 10);
-//    Debug_PrintNumberHex_Dword(cpuState->pr, 17, 10);
-//
-//    Debug_SetCursorPosition(0, 12);
-//    Debug_PrintString("mach=xxxxxxxx", false);
-//    Debug_PrintNumberHex_Dword(cpuState->mach, 5, 12);
-//
-//    Debug_SetCursorPosition(0, 13);
-//    Debug_PrintString("macl=xxxxxxxx", false);
-//    Debug_PrintNumberHex_Dword(cpuState->macl, 5, 13);
+    uint32_t registerAddr = cpuState->r0;
+    if (isAddressWritable(registerAddr)) {
+        // Try to dump its content, EG for strings
+        carret_x = printBytes(registerAddr, 0, ++carret_x);
+    }
+    registerAddr = cpuState->r1;
+    if (isAddressWritable(registerAddr)) {
+        carret_x = printBytes(registerAddr, 1,++carret_x);
+    }
+    registerAddr = cpuState->r2;
+    if (isAddressWritable(registerAddr)) {
+        carret_x = printBytes(registerAddr, 2 ,++carret_x);
+    }
+    registerAddr = cpuState->r3;
+    if (isAddressWritable(registerAddr)) {
+        carret_x = printBytes(registerAddr, 3 ,++carret_x);
+    }
+    registerAddr = cpuState->r4;
+    if (isAddressWritable(registerAddr)) {
+        carret_x = printBytes(registerAddr, 4 ,++carret_x);
+    }
+    registerAddr = cpuState->r5;
+    if (isAddressWritable(registerAddr)) {
+        carret_x = printBytes(registerAddr, 5 ,++carret_x);
+    }
+    registerAddr = cpuState->r6;
+    if (isAddressWritable(registerAddr)) {
+        carret_x = printBytes(registerAddr, 6 ,++carret_x);
+    }
+    registerAddr = cpuState->r7;
+    if (isAddressWritable(registerAddr)) {
+        carret_x = printBytes(registerAddr, 7 ,++carret_x);
+    }
+    registerAddr = cpuState->r8;
+    if (isAddressWritable(registerAddr)) {
+        carret_x = printBytes(registerAddr, 8 ,++carret_x);
+    }
+    registerAddr = cpuState->r9;
+    if (isAddressWritable(registerAddr)) {
+        carret_x = printBytes(registerAddr, 9 ,++carret_x);
+    }
+    registerAddr = cpuState->r10;
+    if (isAddressWritable(registerAddr)) {
+        carret_x = printBytes(registerAddr, 10,++carret_x);
+    }
+    registerAddr = cpuState->r11;
+    if (isAddressWritable(registerAddr)) {
+        carret_x = printBytes(registerAddr, 11,++carret_x);
+    }
+    registerAddr = cpuState->r12;
+    if (isAddressWritable(registerAddr)) {
+        carret_x = printBytes(registerAddr, 12,++carret_x);
+    }
+    registerAddr = cpuState->r14;
+    if (isAddressWritable(registerAddr)) {
+        carret_x = printBytes(registerAddr, 14,++carret_x);
+    }
+    registerAddr = cpuState->r15;
+    if (isAddressWritable(registerAddr)) {
+        carret_x = printBytes(registerAddr, 15,++carret_x);
+    }
 
     LCD_Refresh();
 
+    // Add virtual delay so that we can read the text
+//    int8_t i = 80;
+//    while (i > 0) {
+//        // Eat CPU cycles + Kool animation ! :D
+//        switch (i%4) {
+//            case 0:
+//                Debug_Printf(0,0,false,0,"::");
+//                break;
+//            case 1:
+//                Debug_Printf(0,0,false,0,".:");
+//                break;
+//            case 2:
+//                Debug_Printf(0,0,false,0,"..");
+//                break;
+//            case 3:
+//                Debug_Printf(0,0,false,0,":.");
+//                break;
+//        }
+////        LCD_Refresh();
+//        asm volatile ("nop"::);
+//    }
+
     while(true){
         uint32_t key1, key2;	//First create variables
+        key1 = 0;
+        key2 = 0;
         getKey(&key1, &key2);	//then read the keys
-        if(testKey(key1, key2, KEY_CLEAR)){ //Use testKey() to test if a specific key is pressed
-            break;
+        if(testKey(key1, key2, KEY_CLEAR)){ //Use testKey() to tests if a specific key is pressed
+             break;
         }
     }
 }
@@ -148,6 +184,7 @@ void BreakpointHandler(struct CPUState *cpuState) {
  */
 void SetBreakpoint(uint32_t address) {
     // Set our breakpoint handler stub as the DBR (debug base register)
+    #ifndef PC
     __asm__ volatile(
     "ldc %0, dbr\n"
     :
@@ -173,6 +210,8 @@ void SetBreakpoint(uint32_t address) {
 
     // Enable the channel
     UBC_REG_CBR0 |= 1 << UBC_CBR_CE;
+
+    #endif
 }
 
 /**
@@ -306,9 +345,18 @@ private:
     GUIButton m_close;
 };
 
-void main() {
+extern "C"
+#ifdef PC
+int  main(){
+#else
+void main(){
+#endif
     BreakpointDialog dialog;
     dialog.ShowDialog();
+
+#ifdef PC
+    return 0;
+#endif
 }
 
 //
@@ -332,7 +380,7 @@ void main() {
 //	while(true){
 //		uint32_t key1, key2;	//First create variables
 //		getKey(&key1, &key2);	//then read the keys
-//		if(testKey(key1, key2, KEY_CLEAR)){ //Use testKey() to test if a specific key is pressed
+//		if(testKey(key1, key2, KEY_CLEAR)){ //Use testKey() to tests if a specific key is pressed
 //			break;
 //		}
 //	}

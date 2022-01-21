@@ -2,48 +2,36 @@
 # The .hhk file is the original format, the bin file is a newer format.
 APP_NAME:=TarrasK
 
-SDK_DIR:=/home/phoebe/cross/src/hollyhock-2/sdk
-PATH:=/home/phoebe/cross/opt/sh4eb-nofpu-elf/bin/:$(PATH)
-
-ifndef SDK_DIR
-$(error You need to define the SDK_DIR environment variable, and point it to the sdk/ folder)
-endif
-
-AS:=sh4eb-nofpu-elf-as
-AS_FLAGS:=
-
-CC:=sh4eb-nofpu-elf-gcc
-CC_FLAGS:=-Os -mb -m4a-nofpu -mhitachi -ffreestanding -fno-strict-aliasing -fshort-wchar -Wall -Wextra -I $(SDK_DIR)/include/ \
-	-I $(SDK_DIR)/newlib/sh-elf/include
-
-CXX:=sh4eb-nofpu-elf-g++
-CXX_FLAGS:=-Os -mb -m4a-nofpu -mhitachi -ffreestanding -fno-strict-aliasing -fno-exceptions -fno-rtti -fshort-wchar -Wall -Wextra -O2 -I $(SDK_DIR)/include/ \
-	-I $(SDK_DIR)/newlib/sh-elf/include
-
-LD:=sh4eb-nofpu-elf-gcc
-LD_FLAGS:=-nostartfiles -m4-nofpu -Wno-undef -L$(SDK_DIR)/newlib/sh-elf/lib/ -lm
-
-READELF:=sh4eb-nofpu-elf-readelf
-OBJCOPY:=sh4eb-nofpu-elf-objcopy
-
+# Directory configuration
 SOURCEDIR = src
 BUILDDIR = target/deps
+PC_BUILDDIR = target/deps_pc
 DISTDIR = target
 AS_SOURCES:=$(wildcard $(SOURCEDIR)/*.s)
+AS_PC_SOURCES:=$(wildcard $(SOURCEDIR)/*.asm)
 CC_SOURCES:=$(wildcard $(SOURCEDIR)/*.c)
 CXX_SOURCES:=$(wildcard $(SOURCEDIR)/*.cpp)
 
-# OBJECTS:=$(AS_SOURCES:.s=.o) $(CC_SOURCES:.c=.o) $(CXX_SOURCES:.cpp=.o)
 OBJECTS:=$(patsubst $(SOURCEDIR)/%.s,$(BUILDDIR)/%.o,$(AS_SOURCES)) \
 		$(patsubst $(SOURCEDIR)/%.c,$(BUILDDIR)/%.o,$(CC_SOURCES)) \
 		$(patsubst $(SOURCEDIR)/%.cpp,$(BUILDDIR)/%.o,$(CXX_SOURCES))
 
-APP_ELF:=$(DISTDIR)/$(APP_NAME).hhk
-APP_BIN:=$(DISTDIR)/$(APP_NAME).bin
+PC_OBJECTS:=$(patsubst $(SOURCEDIR)/%.s,$(PC_BUILDDIR)/%.o,$(AS_PC_SOURCES)) \
+		$(patsubst $(SOURCEDIR)/%.c,$(PC_BUILDDIR)/%.o,$(CC_SOURCES)) \
+		$(patsubst $(SOURCEDIR)/%.cpp,$(PC_BUILDDIR)/%.o,$(CXX_SOURCES))
+
+# Cross compiler
+include config.mk
+# Native & Win32 compiler
+include config.pc.mk
 
 bin: $(APP_BIN) Makefile
 
 hhk: $(APP_ELF) Makefile
+
+pc: $(APP_PC) Makefile
+
+win32: $(APP_WIN32) Makefile
 
 all: $(APP_ELF) $(APP_BIN) Makefile
 
@@ -61,6 +49,14 @@ $(APP_ELF): $(OBJECTS) $(SDK_DIR)/sdk.o linker_hhk.ld
 $(APP_BIN): $(OBJECTS) $(SDK_DIR)/sdk.o linker_bin.ld
 	@mkdir -p $(DISTDIR)
 	$(LD) -Wl,--oformat=binary -T linker_bin.ld -o $@ $(LD_FLAGS) $(OBJECTS) $(SDK_DIR)/sdk.o
+
+$(APP_PC):  $(CC_SOURCES) $(CXX_SOURCES) $(H_INC) $(HPP_INC)
+	$(CC_PC) $(CC_SOURCES) $(CXX_SOURCES) -o $(APP_PC) $(CC_PC_FLAGS)
+
+
+$(APP_WIN32):  $(PC_OBJECTS) $(CXX_SOURCES) $(H_INC) $(HPP_INC)
+	$(CC_WIN32) $(PC_OBJECTS) $(CXX_SOURCES) -o $(APP_WIN32) $(CC_WIN32_FLAGS)
+
 
 # We're not actually building sdk.o, just telling the user they need to do it
 # themselves. Just using the target to trigger an error when the file is
@@ -85,4 +81,28 @@ $(BUILDDIR)/%.o: $(SOURCEDIR)/%.cpp
 	$(CXX) -c $< -o $@ $(CXX_FLAGS)
 	@$(READELF) $@ -S | grep ".ctors" > /dev/null && echo "ERROR: Global constructors aren't supported." && rm $@ && exit 1 || exit 0
 
-.PHONY: bin hhk all clean
+tests:
+	g++ -Wall -D DEBUG -o $(DISTDIR)/unit_tests -I. $(wildcard tests/*.c)
+	./$(DISTDIR)/unit_tests
+
+
+# TODO: fox win32
+
+$(PC_BUILDDIR)/%.o: $(SOURCEDIR)/%.asm
+	@mkdir -p $(PC_BUILDDIR)
+	echo "PC ASM"
+	$(AS) $< -o $@ $(AS_FLAGS)
+
+$(PC_BUILDDIR)/%.o: $(SOURCEDIR)/%.c
+	@mkdir -p $(PC_BUILDDIR)
+	echo "PC C"
+	$(CC_WIN32) -c $< -o $@ $(CC_WIN32_FLAGS)
+
+$(PC_BUILDDIR)/%.o: $(SOURCEDIR)/%.cpp
+	@mkdir -p $(PC_BUILDDIR)
+	echo "PC C++"
+	$(CXX_WIN32) -c $< -o $@ $(CC_WIN32_FLAGS)
+	# @$(READELF) $@ -S | grep ".ctors" > /dev/null && echo "ERROR: Global constructors aren't supported." && rm $@ && exit 1 || exit 0
+
+
+.PHONY: bin hhk pc all clean tests
